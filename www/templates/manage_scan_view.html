@@ -1,0 +1,163 @@
+{% extends '__base__.html' %}
+
+{% block title %}
+Scan Options -
+{% if type == 'sqlmap' %}SQLMAP Servers
+{% else %}Unknown
+{% endif %}
+{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+function initVM(data) {
+    $('#div-scan').show();
+    var vm = new Vue({
+        el: '#div-scan',
+        data: {
+            sqlmaps: data.sqlmaps,
+            type: data.type,
+            page: data.page
+        },
+        methods: {
+            previous: function () {
+                gotoPage(this.page.page_index - 1);
+            },
+            next: function () {
+                gotoPage(this.page.page_index + 1);
+            },
+            edit_sqlmap: function (sqlmap) {
+                var url = '/manage/scan/{{ type }}/' + sqlmap.id + '/edit';
+                location.href = url;
+            },
+            delete_sqlmap: function (sqlmap) {
+                var url = '/api/scan/{{ type }}/' + sqlmap.id + '/delete';
+                getApi(url, function (err, r) {
+                    if (err) {
+                        showError(err);
+                        $('#error_alert').show();
+                        setTimeout("$('#error_alert').hide()", 3000);
+                    }
+                    else {
+                        return location.assign('/manage/scan/sqlmap/view');
+                    }
+                });
+            },
+            submit: function (event) {
+                event.preventDefault();
+                startLoading();
+                postApi('/api/scan/{{ type }}/update', this.exclusion, function (err, r) {
+                    if (err) {
+                        showError(err);
+                        $('#error_alert').show();
+                        setTimeout("$('#error_alert').hide()", 3000);
+                    }
+                    else {
+                        if (r.result=='success'){
+                            $('#update_success').show();
+                            setTimeout("$('#update_success').hide()", 3000);
+                        }
+                        if (r.result=='failed'){
+                            $('#update_failed').show();
+                            setTimeout("$('#update_success').hide()", 3000);
+                        }
+                    }
+                    stopLoading();
+                });
+
+            }
+        }
+    });
+}
+
+$(function() {
+    getApi('/api/scan/{{ type }}/view?page={{ page_index }}', function (err, results) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1">
+        <div class="uk-container uk-container-center">
+            <div data-uk-grid-margin="" class="uk-grid">
+                <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+                    <ul data-uk-nav="" class="tm-nav uk-nav">
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Exclusions</li>
+                        <li><a href="/manage/exclusions/parse/view">Log Parse</a></li>
+                        <li><a href="/manage/exclusions/cookie/view">Cookie Parameter</a></li>
+                        <li><a href="/manage/exclusions/xss/view">XSS Scan</a></li>
+                        <li><a href="/manage/exclusions/sqli/view">SQLi Scan</a></li>
+
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Scan Options</li>
+                        <li><a href="/manage/scan/sqlmap/view">SQLMAP Servers</a></li>
+
+                        <li class="uk-nav-header uk-text-large uk-text-bold">System Options</li>
+                        <li><a href="grid.html">SMTP</a></li>
+                    </ul>
+                </div>
+                <div class="tm-main uk-width-medium-3-4">
+                    <div id="error_alert" class="uk-width-1-1"><div class="uk-alert uk-alert-danger uk-hidden"></div></div>
+                    <div id="div-scan" class="uk-width-1-1" style="display:none">
+                        <h1 v-if="type=='sqlmap'" class="uk-text-large uk-text-bold">SQLMAP Servers</h1>
+                        <a href="/manage/scan/sqlmap/add" class="uk-button uk-button-primary"><i class="uk-icon-plus"></i> Add</a>
+                        <table class="uk-table uk-table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="uk-width-3-10">Time</th>
+                                    <th class="uk-width-3-10">IP</th>
+                                    <th class="uk-width-2-10">Port</th>
+                                    <th class="uk-width-1-10">Status</th>
+                                    <th class="uk-width-1-10">Operations</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-repeat="sqlmap: sqlmaps" >
+                                    <td>
+                                        <span v-text="sqlmap.update_time"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="sqlmap.ip"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="sqlmap.port"></span>
+                                    </td>
+                                    <td>
+                                        <span v-if="sqlmap.status==1" class="uk-badge uk-badge-success">Enable</span>
+                                        <span v-if="sqlmap.status==2" class="uk-badge uk-badge-danger">Disable</span>
+                                    </td>
+                                    <td>
+                                        <a href="#0" v-on="click: edit_sqlmap(sqlmap)"><i class="uk-icon-edit"></i>
+                                        <a href="#0" v-on="click: delete_sqlmap(sqlmap)"><i class="uk-icon-trash-o"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="uk-width-1-1 uk-text-center">
+                            <ul class="uk-pagination">
+                                <li v-if="! page.has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+                                <li v-if="page.has_previous"><a v-on="click: previous()" href="#0"><i class="uk-icon-angle-double-left"></i></a></li>
+                                <li class="uk-active"><span v-text="page.page_index"></span></li>
+                                <li v-if="! page.has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+                                <li v-if="page.has_next"><a v-on="click: next()" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="div-loading" class="uk-width-1-1 uk-text-center">
+        <span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> Loading...</span>
+    </div>
+{% endblock %}

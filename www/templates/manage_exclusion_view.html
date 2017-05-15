@@ -1,0 +1,215 @@
+{% extends '__base__.html' %}
+
+{% block title %}
+Exclusions -
+{% if type == 'parse' %}Log Parse
+{% elif type == 'cookie' %}Cookie Parameter
+{% elif type == 'xss' %}XSS Scan
+{% elif type == 'sqli' %}SQLi Scan
+{% elif type == 'fi' %}FI Scan
+{% else %}Unknown
+{% endif %}
+{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+function initVM(data) {
+    $('#form-exclusion').show();
+    var vm = new Vue({
+        el: '#form-exclusion',
+        data: {
+            exclusion: data.exclusion,
+            type: data.type,
+        },
+        methods: {
+            submit: function (event) {
+                event.preventDefault();
+                startLoading();
+                postApi('/api/exclusions/{{ type }}/update', this.exclusion, function (err, r) {
+                    if (err) {
+                        showError(err);
+                        $('#error_alert').show();
+                        setTimeout("$('#error_alert').hide()", 3000);
+                    }
+                    else {
+                        if (r.result=='success'){
+                            $('#update_success').show();
+                            setTimeout("$('#update_success').hide()", 3000);
+                        }
+                        if (r.result=='failed'){
+                            $('#update_failed').show();
+                            setTimeout("$('#update_success').hide()", 3000);
+                        }
+                    }
+                    stopLoading();
+                });
+
+            }
+        }
+    });
+}
+
+$(function() {
+    getApi('/api/exclusions/{{ type }}/view', function (err, results) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        $('#update_success').hide();
+        $('#update_failed').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1">
+        <div class="uk-container uk-container-center">
+            <div data-uk-grid-margin="" class="uk-grid">
+                <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+                    <ul data-uk-nav="" class="tm-nav uk-nav">
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Exclusions</li>
+                        <li><a href="/manage/exclusions/parse/view">Log Parse</a></li>
+                        <li><a href="/manage/exclusions/cookie/view">Cookie Parameter</a></li>
+                        <li><a href="/manage/exclusions/xss/view">XSS Scan</a></li>
+                        <li><a href="/manage/exclusions/sqli/view">SQLi Scan</a></li>
+                        <li><a href="/manage/exclusions/fi/view">FI Scan</a></li>
+
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Scan Options</li>
+                        <li><a href="/manage/scan/sqlmap/view">SQLMAP Servers</a></li>
+                    </ul>
+                </div>
+                <div class="tm-main uk-width-medium-3-4">
+                    <form id="form-exclusion" v-on="submit: submit" class="uk-form uk-form-stacked" style="display:none">
+                        <div id="error_alert" class="uk-width-1-1"><div class="uk-alert uk-alert-danger uk-hidden"></div></div>
+                        <div id="update_success" class="uk-alert uk-alert-success" style="display:none"><a href="" class="uk-alert-close uk-close"></a><p>Update Success</p></div>
+                        <div id="update_failed" class="uk-alert uk-alert-warning" style="display:none"><a href="" class="uk-alert-close uk-close"></a><p>Update Failed</p></div>
+                        <div v-if="type=='xss' || type=='sqli' || type=='fi'">
+                            <h1 v-if="type=='xss'" class="uk-text-large uk-text-bold">XSS Scan Exclusions</h1>
+                            <h1 v-if="type=='sqli'" class="uk-text-large uk-text-bold">SQLi Scan Exclusions</h1>
+                            <h1 v-if="type=='fi'" class="uk-text-large uk-text-bold">File Inclusion Scan Exclusions</h1>
+                            <p class="uk-text-warning">Please use | as delimiter for multiple exclusions or leave it blank if no exclusion.</p>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Method: <span class="uk-text-small uk-text-success">(e.g. GET, POST, GET|POST)</span></label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.method" name="method" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Protocol: <span class="uk-text-small uk-text-success">(e.g. HTTP, HTTPS, HTTP|HTTPS)</span></label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.protocol" name="protocol" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Host: <span class="uk-text-small uk-text-success">(e.g. google|baidu)</span></label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.host" name="host" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">IP:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.ip" name="ip" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Port: <span class="uk-text-small uk-text-success">(e.g. 443)</span></label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.port" name="port" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Path:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.path" name="path" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Accept:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.accept" name="accept" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Accept Language:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.accept_language" name="accept_language" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Accept Encoding:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.accept_encoding" name="accept_encoding" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Referer:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.referer" name="referer" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">User Agent:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.user_agent" name="user_agent" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Cookie:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.cookie" name="cookie" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Content Type:</label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.content_type" name="content_type" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Post Data:</label>
+                                <div class="uk-form-controls">
+                                    <textarea v-model="exclusion.post_data" rows="3" name="post_data" class="uk-width-1-1" style="resize:none;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="type=='parse'">
+                            <h1 class="uk-text-large uk-text-bold">Log Parse Exclusions</h1>
+                            <p class="uk-text-warning">Please use | as delimiter for multiple exclusions or leave it blank if no exclusion.</p>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Exclusion: <span class="uk-text-small uk-text-success">(e.g. google|baidu)</span></label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.exclusion" name="exclusion" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                        </div>
+                        <div v-if="type=='cookie'">
+                            <h1 class="uk-text-large uk-text-bold">Cookie Parameter Exclusions</h1>
+                            <p class="uk-text-warning">Please use | as delimiter for multiple exclusions or leave it blank if no exclusion.</p>
+                            <div class="uk-form-row">
+                                <label class="uk-form-label">Exclusion: <span class="uk-text-small uk-text-success">(e.g. PHPSESSID|BAIDUID)</span></label>
+                                <div class="uk-form-controls">
+                                    <input v-model="exclusion.exclusion" name="exclusion" type="text" class="uk-width-1-1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="uk-form-row uk-text-center">
+                            <br/><button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-save"></i> Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="div-loading" class="uk-width-1-1 uk-text-center">
+        <span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> Loading...</span>
+    </div>
+{% endblock %}

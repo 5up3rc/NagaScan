@@ -1,0 +1,83 @@
+nagascan<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    {% block meta %}<!-- block meta  -->{% endblock %}
+    <title>{% block title %} ? {% endblock %} - NagaScan v1.0</title>
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" href="/static/css/uikit.min.css">
+    <link rel="stylesheet" href="/static/css/uikit.gradient.min.css">
+    <link rel="stylesheet" href="/static/css/nagascan.css" />
+    <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/md5.js"></script>
+    <script src="/static/js/uikit.min.js"></script>
+    <script src="/static/js/sticky.min.js"></script>
+    <script src="/static/js/vue.min.js"></script>
+    <script src="/static/js/nagascan.js"></script>
+    {% block beforehead %}<!-- before head  -->{% endblock %}
+</head>
+<body>
+    <nav class="uk-navbar uk-navbar-attached uk-margin-bottom">
+        <div class="uk-container uk-container-center">
+            <a href="/" class="uk-navbar-brand">NagaScan v1.0</a>
+            <ul class="uk-navbar-nav">
+                <li data-url="blogs"><a href="/"><i class="uk-icon-home"></i> Home</a></li>
+                <li data-url="blogs"><a href="/manage/"><i class="uk-icon-cog"></i> Manage</a></li>
+            </ul>
+            <div class="uk-navbar-flip">
+                <ul class="uk-navbar-nav">
+                {% if user %}
+                    <li class="uk-parent" data-uk-dropdown>
+                        <a href="#0"><i class="uk-icon-user"></i> {{ user.name }}</a>
+                        <div class="uk-dropdown uk-dropdown-navbar">
+                            <ul class="uk-nav uk-nav-navbar">
+                                <li><a href="/signout"><i class="uk-icon-sign-out"></i> Sign Out</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                {% else %}
+                    <li><a href="/signin"><i class="uk-icon-sign-in"></i> Sign In</a></li>
+                    <li><a href="/register"><i class="uk-icon-edit"></i> Sign Up</a></li>
+                {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="uk-container uk-container-center">
+        <div class="uk-grid">
+            <!-- content -->
+            <div class="uk-width-1-1 uk-margin-bottom">
+                <div class="uk-panel uk-panel-box">
+                    <ul class="uk-breadcrumb">
+                        <li><a href="/manage/requests">Requests</a></li>
+                        <li><a href="/manage/vulns/xss/list">Vulnerabilities</a></li>
+                        <li><a href="/manage/exclusions/parse/view">Configuration</a></li>
+                        <li><a href="/manage/users">Users</a></li>
+                    </ul>
+                </div>
+            </div>
+            {% block content %}
+            {% endblock %}
+            <!-- // content -->
+        </div>
+    </div>
+
+    <div class="uk-margin-large-top" style="background-color:#eee; border-top:1px solid #ccc;">
+        <div class="uk-container uk-container-center uk-text-center">
+            <div class="uk-panel uk-margin-top uk-margin-bottom">
+                <p>
+                    <a target="_blank" href="https://github.com/brianwrf" class="uk-icon-button uk-icon-github"></a>
+                    <a target="_blank" href="http://avfisher.win/" class="uk-icon-button uk-icon-book"></a>
+                </p>
+                <p>Powered by <a href="http://avfisher.win/">NagaScan</a>. Copyright &copy; 2017.</p>
+                <p><a href="http://avfisher.win/" target="_blank">avfisher</a>. All rights reserved.</p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

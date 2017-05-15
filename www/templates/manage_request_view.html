@@ -1,0 +1,143 @@
+{% extends '__base__.html' %}
+
+{% block title %}View Scan Results{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+var url = '{{ url }}';
+
+function initVM(data) {
+    $('#div-request-view').show();
+    var vm = new Vue({
+        el: '#div-request-view',
+        data: {
+            request: data.request[0],
+            response: data.response[0],
+        }
+    });
+}
+
+$(function() {
+    $('#div-request-view').hide();
+    getApi(url, function (err, results) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div id="div-request-view" class="uk-width">
+          <dl v-if="request.id" class="uk-description-list-horizontal">
+              <dt>ID:</dt>
+              <dd><p v-model="request.id"></p></dd>
+          </dl>
+          <dl v-if="request.rid" class="uk-description-list-horizontal">
+              <dt>RID:</dt>
+              <dd><p v-model="request.rid"></p></dd>
+          </dl>
+          <dl v-if="request.update_time" class="uk-description-list-horizontal">
+              <dt>Time:</dt>
+              <dd><p v-model="request.update_time" ></p></dd>
+          </dl>
+          <dl v-if="request.method" class="uk-description-list-horizontal">
+              <dt>Method:</dt>
+              <dd><p v-model="request.method" ></p></dd>
+          </dl>
+          <dl v-if="request.ip" class="uk-description-list-horizontal">
+              <dt>IP:</dt>
+              <dd><p v-model="request.ip" ></p></dd>
+          </dl>
+          <dl v-if="request.protocol&&request.host&&request.path" class="uk-description-list-horizontal">
+              <dt>URL:</dt>
+              <dd><p v-model="request.protocol+'://'+request.host+request.path" ></p></dd>
+          </dl>
+          <dl v-if="request.accept" class="uk-description-list-horizontal">
+              <dt>Accept:</dt>
+              <dd><p v-model="request.accept" ></p></dd>
+          </dl>
+          <dl v-if="request.accept_language" class="uk-description-list-horizontal">
+              <dt>Accept Language:</dt>
+              <dd><p v-model="request.accept_language" ></p></dd>
+          </dl>
+          <dl v-if="request.accept_encoding" class="uk-description-list-horizontal">
+              <dt>Accept Encoding:</dt>
+              <dd><p v-model="request.accept_encoding" ></p></dd>
+          </dl>
+          <dl v-if="request.referer" class="uk-description-list-horizontal">
+              <dt>Referer:</dt>
+              <dd><p v-model="request.referer" ></p></dd>
+          </dl>
+          <dl v-if="request.user_agent" class="uk-description-list-horizontal">
+              <dt>User Agent:</dt>
+              <dd><p v-model="request.user_agent" ></p></dd>
+          </dl>
+          <dl v-if="request.cookie" class="uk-description-list-horizontal">
+              <dt>Cookie:</dt>
+              <dd><p v-model="request.cookie" ></p></dd>
+          </dl>
+          <dl v-if="request.content_type" class="uk-description-list-horizontal">
+              <dt>Content Type:</dt>
+              <dd><p v-model="request.content_type" ></p></dd>
+          </dl>
+          <dl v-if="request.post_data" class="uk-description-list-horizontal">
+              <dt>Post Data:</dt>
+              <dd><p v-model="request.post_data" ></p></dd>
+          </dl>
+          <dl v-if="request.result_xss" class="uk-description-list-horizontal">
+              <dt>Scan Result of XSS:</dt>
+              <dd><span v-if="request.result_xss=='vulnerable'" class="uk-badge uk-badge-danger">vulnerable</span></dd>
+              <dd><span v-if="request.result_xss=='not vulnerable'" class="uk-badge uk-badge-success">not vulnerable</span></dd>
+              <dd><span v-if="request.result_xss=='not scan yet'" class="uk-badge uk-badge-warning">not scan yet</span></dd>
+          </dl>
+          <dl v-if="request.result_sqli" class="uk-description-list-horizontal">
+              <dt>Scan Result of SQLi:</dt>
+              <dd><span v-if="request.result_sqli=='vulnerable'" class="uk-badge uk-badge-danger">vulnerable</span></dd>
+              <dd><span v-if="request.result_sqli=='not vulnerable'" class="uk-badge uk-badge-success">not vulnerable</span></dd>
+              <dd><span v-if="request.result_sqli=='not scan yet'" class="uk-badge uk-badge-warning">not scan yet</span></dd>
+          </dl>
+          <dl v-if="request.result_fi" class="uk-description-list-horizontal">
+              <dt>Scan Result of FI:</dt>
+              <dd><span v-if="request.result_fi=='vulnerable'" class="uk-badge uk-badge-danger">vulnerable</span></dd>
+              <dd><span v-if="request.result_fi=='not vulnerable'" class="uk-badge uk-badge-success">not vulnerable</span></dd>
+              <dd><span v-if="request.result_fi=='not scan yet'" class="uk-badge uk-badge-warning">not scan yet</span></dd>
+          </dl>
+          <dl v-if="request.poc_xss" class="uk-description-list-horizontal">
+              <dt>POC of XSS:</dt>
+              <dd><p v-model="request.poc_xss" ></p></dd>
+          </dl>
+          <dl v-if="request.poc_sqli" class="uk-description-list-horizontal">
+              <dt>POC of SQLi:</dt>
+              <dd><p v-model="request.poc_sqli" ></p></dd>
+          </dl>
+          <dl v-if="request.poc_fi" class="uk-description-list-horizontal">
+              <dt>POC of FI:</dt>
+              <dd><p v-model="request.poc_fi" ></p></dd>
+          </dl>
+          <dl v-if="request.result_xss == 'vulnerable'" class="uk-description-list-horizontal">
+              <dt>Response of XSS:</dt>
+              <dd><pre v-model="response.response_xss" ></pre></dd>
+          </dl>
+          <dl v-if="request.result_fi == 'vulnerable'" class="uk-description-list-horizontal">
+              <dt>Response of FI:</dt>
+              <dd><pre v-model="response.response_fi" ></pre></dd>
+          </dl>
+          <div class="uk-width-1-1 uk-text-center">
+              <a class="uk-button uk-button-success" href="javascript:history.go(-1)" ><i class="uk-icon-undo"></i> Return</a>
+          </div>
+    </div>
+
+
+    <div id="div-loading" class="uk-width-1-1 uk-text-center">
+        <span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> Loading...</span>
+    </div>
+{% endblock %}

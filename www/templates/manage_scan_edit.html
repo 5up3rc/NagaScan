@@ -1,0 +1,127 @@
+{% extends '__base__.html' %}
+
+{% block title %}
+Scan Options-
+{% if type == 'sqlmap' %}SQLMAP Servers
+{% else %}Unknown
+{% endif %}
+{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+var url = '{{ url }}';
+
+function initVM(data) {
+    $('#form-sqlmap').show();
+    var vm = new Vue({
+        el: '#form-sqlmap',
+        data: {
+            sqlmap: data.sqlmap[0],
+            type: data.type,
+            id: data.id,
+        },
+        methods: {
+            submit: function (event) {
+                event.preventDefault();
+                startLoading();
+                postApi('/api/scan/'+this.type+'/'+this.id+'/update', this.sqlmap, function (err, r) {
+                    if (err) {
+                        showError(err);
+                        $('#error_alert').show();
+                        setTimeout("$('#error_alert').hide()", 3000);
+                    }
+                    else {
+                        if (r.result=='success'){
+                            $('#update_success').show();
+                            setTimeout("$('#update_success').hide()", 3000);
+                            return location.assign('/manage/scan/sqlmap/view');
+                        }
+                        if (r.result=='failed'){
+                            $('#update_failed').show();
+                            setTimeout("$('#update_success').hide()", 3000);
+                        }
+                    }
+                    stopLoading();
+                });
+
+            }
+        }
+    });
+}
+
+$(function() {
+    getApi(url, function (err, results) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        $('#update_success').hide();
+        $('#update_failed').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1">
+        <div class="uk-container uk-container-center">
+            <div data-uk-grid-margin="" class="uk-grid">
+                <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+                    <ul data-uk-nav="" class="tm-nav uk-nav">
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Exclusions</li>
+                        <li><a href="/manage/exclusions/parse/view">Log Parse</a></li>
+                        <li><a href="/manage/exclusions/cookie/view">Cookie Parameter</a></li>
+                        <li><a href="/manage/exclusions/xss/view">XSS Scan</a></li>
+                        <li><a href="/manage/exclusions/sqli/view">SQLi Scan</a></li>
+
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Scan Options</li>
+                        <li><a href="/manage/scan/sqlmap/view">SQLMAP Servers</a></li>
+
+                        <li class="uk-nav-header uk-text-large uk-text-bold">System Options</li>
+                        <li><a href="grid.html">SMTP</a></li>
+                    </ul>
+                </div>
+                <div class="tm-main uk-width-medium-3-4">
+                    <form id="form-sqlmap" v-on="submit: submit" class="uk-form uk-form-stacked">
+                        <div id="error_alert" class="uk-width-1-1"><div class="uk-alert uk-alert-danger uk-hidden"></div></div>
+                        <div id="update_success" class="uk-alert uk-alert-success" style="display:none"><a href="" class="uk-alert-close uk-close"></a><p>Update Success</p></div>
+                        <div id="update_failed" class="uk-alert uk-alert-warning" style="display:none"><a href="" class="uk-alert-close uk-close"></a><p>Update Failed</p></div>
+                        <h1 v-if="type=='sqlmap'" class="uk-text-large uk-text-bold">SQLMAP Servers</h1>
+                        <div class="uk-form-row">
+                            <label class="uk-form-label">IP:</label>
+                            <div class="uk-form-controls">
+                                <input v-model="sqlmap.ip" name="ip" type="text" class="uk-width-1-1">
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <label class="uk-form-label">Port: <span class="uk-text-small uk-text-success">(Range：1-65535)</span></label>
+                            <div class="uk-form-controls">
+                                <input v-model="sqlmap.port" name="port" type="text" class="uk-width-1-1">
+                            </div>
+                        </div>
+                        <div class="uk-form-row">
+                            <label class="uk-form-label">Status: <span class="uk-text-small uk-text-success">(1: Avaliable；2: Unavaliable)</span></label>
+                            <div class="uk-form-controls">
+                                <input v-model="sqlmap.status" name="status" type="text" class="uk-width-1-1">
+                            </div>
+                        </div>
+                        <div class="uk-form-row uk-text-center">
+                            <br/><button type="submit" class="uk-button uk-button-primary"><i class="uk-icon-save"></i> Save</button>
+                            <a href="/manage/scan/sqlmap/view" class="uk-button uk-button-success"><i class="uk-icon-undo"></i> Return</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="div-loading" class="uk-width-1-1 uk-text-center">
+        <span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> Loading...</span>
+    </div>
+{% endblock %}

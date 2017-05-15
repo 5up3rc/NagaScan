@@ -1,0 +1,148 @@
+{% extends '__base__.html' %}
+
+{% block title %}
+Vulnerabilities -
+{% if type == 'xss' %}XSS Scan
+{% elif type == 'sqli' %}SQLi Scan
+{% elif type == 'fi' %}FI Scan
+{% else %}Unknown
+{% endif %}
+{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+function initVM(data) {
+    $('#div-requests').show();
+    var vm = new Vue({
+        el: '#div-requests',
+        data: {
+            requests: data.requests,
+            page: data.page,
+            type: data.type,
+        },
+        methods: {
+            previous: function () {
+                gotoPage(this.page.page_index - 1);
+            },
+            next: function () {
+                gotoPage(this.page.page_index + 1);
+            },
+            view_request: function (request) {
+                var url = '/manage/requests/' + request.rid + '/view';
+                location.href = url;
+            }
+        }
+    });
+}
+
+$(function() {
+    getApi('/api/vulns/{{ type }}/list?page={{ page_index }}', function (err, results) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1">
+        <div class="uk-alert uk-alert-danger uk-hidden"></div>
+    </div>
+
+    <div class="uk-width-1-1">
+        <div class="uk-container uk-container-center">
+            <div data-uk-grid-margin="" class="uk-grid">
+                <div class="tm-sidebar uk-width-medium-1-4 uk-hidden-small uk-row-first">
+                    <ul data-uk-nav="" class="tm-nav uk-nav">
+                        <li class="uk-nav-header uk-text-large uk-text-bold">Vulnerabilities</li>
+                        <li><a href="/manage/vulns/xss/list">Crosss Site Scripting (XSS)</a></li>
+                        <li><a href="/manage/vulns/sqli/list">SQL Injection</a></li>
+                        <li><a href="/manage/vulns/fi/list">File Inclusion</a></li>
+                    </ul>
+                </div>
+                <div class="tm-main uk-width-medium-3-4">
+                    <div id="div-requests" class="uk-width-1-1" style="display:none">
+                        <h1 v-if="type=='xss'" class="uk-text-large uk-text-bold">Crosss Site Scripting (XSS)</h1>
+                        <h1 v-if="type=='sqli'" class="uk-text-large uk-text-bold">SQL Injection</h1>
+                        <h1 v-if="type=='fi'" class="uk-text-large uk-text-bold">File Inclusion</h1>
+                        <p class="uk-text-success">The following are the scan results.</p>
+                        <table class="uk-table uk-table-hover">
+                            <thead>
+                                <tr>
+                                  <th class="uk-width-1-10">ID</th>
+                                  <th class="uk-width-2-10">Time</th>
+                                  <th class="uk-width-1-10">Method</th>
+                                  <th class="uk-width-1-10">Protocol</th>
+                                  <th class="uk-width-1-10">Port</th>
+                                  <th class="uk-width-2-10">Host</th>
+                                  <th class="uk-width-1-10">Status</th>
+                                  <th class="uk-width-1-10">View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-repeat="request: requests" >
+                                    <td>
+                                        <span v-text="request.id"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="request.update_time"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="request.method"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="request.protocol"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="request.port"></span>
+                                    </td>
+                                    <td>
+                                        <!--<span v-model="request.protocol+'://'+request.host+request.path"></span>-->
+                                        <span v-model="request.host"></span>
+                                    </td>
+                                    <td>
+                                        <span v-if="type=='xss' && request.result_xss=='vulnerable'" class="uk-badge uk-badge-danger">vulnerable</span></dd>
+                                        <span v-if="type=='xss' && request.result_xss=='not vulnerable'" class="uk-badge uk-badge-success">not vulnerable</span></dd>
+                                        <span v-if="type=='xss' && request.result_xss=='not scan yet'" class="uk-badge uk-badge-warning">not scan yet</span></dd>
+
+                                        <span v-if="type=='sqli' && request.result_sqli=='vulnerable'" class="uk-badge uk-badge-danger">vulnerable</span></dd>
+                                        <span v-if="type=='sqli' && request.result_sqli=='not vulnerable'" class="uk-badge uk-badge-success">not vulnerable</span></dd>
+                                        <span v-if="type=='sqli' && request.result_sqli=='not scan yet'" class="uk-badge uk-badge-warning">not scan yet</span></dd>
+
+                                        <span v-if="type=='fi' && request.result_fi=='vulnerable'" class="uk-badge uk-badge-danger">vulnerable</span></dd>
+                                        <span v-if="type=='fi' && request.result_fi=='not vulnerable'" class="uk-badge uk-badge-success">not vulnerable</span></dd>
+                                        <span v-if="type=='fi' && request.result_fi=='not scan yet'" class="uk-badge uk-badge-warning">not scan yet</span></dd>
+                                    </td>
+                                    <td>
+                                        <a href="#0" v-on="click: view_request(request)"><i class="uk-icon-eye"></i>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="uk-width-1-1 uk-text-center">
+                            <ul class="uk-pagination">
+                                <li v-if="! page.has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+                                <li v-if="page.has_previous"><a v-on="click: previous()" href="#0"><i class="uk-icon-angle-double-left"></i></a></li>
+                                <li class="uk-active"><span v-text="page.page_index"></span></li>
+                                <li v-if="! page.has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+                                <li v-if="page.has_next"><a v-on="click: next()" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="div-loading" class="uk-width-1-1 uk-text-center">
+        <span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> Loading...</span>
+    </div>
+{% endblock %}

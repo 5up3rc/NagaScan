@@ -1,0 +1,118 @@
+{% extends '__base__.html' %}
+
+{% block title %}Requests{% endblock %}
+
+{% block beforehead %}
+
+<script>
+
+function initVM(data) {
+    $('#div-requests').show();
+    var vm = new Vue({
+        el: '#div-requests',
+        data: {
+            requests: data.requests,
+            page: data.page
+        },
+        methods: {
+            previous: function () {
+                gotoPage(this.page.page_index - 1);
+            },
+            next: function () {
+                gotoPage(this.page.page_index + 1);
+            },
+
+            view_request: function (request) {
+                var url = '/manage/requests/' + request.rid + '/view';
+                location.href = url;
+            }
+        }
+    });
+}
+
+$(function() {
+    getApi('/api/requests?page={{ page_index }}', function (err, results) {
+        if (err) {
+            return showError(err);
+        }
+        $('#div-loading').hide();
+        initVM(results);
+    });
+});
+
+</script>
+
+{% endblock %}
+
+{% block content %}
+
+    <div class="uk-width-1-1">
+        <div class="uk-alert uk-alert-danger uk-hidden"></div>
+    </div>
+
+    <div id="div-requests" class="uk-width-1-1" style="display:none">
+        <table class="uk-table uk-table-hover">
+            <thead>
+                <tr>
+                    <th class="uk-width-1-10">ID</th>
+                    <th class="uk-width-2-10">Time</th>
+                    <th class="uk-width-1-10">Method</th>
+                    <th class="uk-width-1-10">Protocol</th>
+                    <th class="uk-width-1-10">Host</th>
+                    <th class="uk-width-3-10">Status</th>
+                    <th class="uk-width-1-10">View</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-repeat="request: requests" >
+                    <td>
+                        <span v-text="request.id"></span>
+                    </td>
+                    <td>
+                        <span v-text="request.update_time"></span>
+                    </td>
+                    <td>
+                        <span v-text="request.method"></span>
+                    </td>
+                    <td>
+                        <span v-text="request.protocol"></span>
+                    </td>
+                    <td>
+                        <!--<span v-model="request.protocol+'://'+request.host+request.path"></span>-->
+                        <span v-model="request.host"></span>
+                    </td>
+                    <td>
+                        <span v-if="request.result_xss=='vulnerable'" class="uk-badge uk-badge-danger">xss: vulnerable</span></dd>
+                        <span v-if="request.result_xss=='not vulnerable'" class="uk-badge uk-badge-success">xss: not vulnerable</span></dd>
+                        <span v-if="request.result_xss=='not scan yet'" class="uk-badge uk-badge-warning">xss: not scan yet</span></dd>
+
+                        <span v-if="request.result_sqli=='vulnerable'" class="uk-badge uk-badge-danger">sqli: vulnerable</span></dd>
+                        <span v-if="request.result_sqli=='not vulnerable'" class="uk-badge uk-badge-success">sqli: not vulnerable</span></dd>
+                        <span v-if="request.result_sqli=='not scan yet'" class="uk-badge uk-badge-warning">sqli: not scan yet</span></dd>
+
+                        <span v-if="request.result_fi=='vulnerable'" class="uk-badge uk-badge-danger">fi: vulnerable</span></dd>
+                        <span v-if="request.result_fi=='not vulnerable'" class="uk-badge uk-badge-success">fi: not vulnerable</span></dd>
+                        <span v-if="request.result_fi=='not scan yet'" class="uk-badge uk-badge-warning">fi: not scan yet</span></dd>
+                    </td>
+                    <td>
+                        <a href="#0" v-on="click: view_request(request)"><i class="uk-icon-eye"></i>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="uk-width-1-1 uk-text-center">
+            <ul class="uk-pagination">
+                <li v-if="! page.has_previous" class="uk-disabled"><span><i class="uk-icon-angle-double-left"></i></span></li>
+                <li v-if="page.has_previous"><a v-on="click: previous()" href="#0"><i class="uk-icon-angle-double-left"></i></a></li>
+                <li class="uk-active"><span v-text="page.page_index"></span></li>
+                <li v-if="! page.has_next" class="uk-disabled"><span><i class="uk-icon-angle-double-right"></i></span></li>
+                <li v-if="page.has_next"><a v-on="click: next()" href="#0"><i class="uk-icon-angle-double-right"></i></a></li>
+            </ul>
+        </div>
+    </div>
+
+
+    <div id="div-loading" class="uk-width-1-1 uk-text-center">
+        <span><i class="uk-icon-spinner uk-icon-medium uk-icon-spin"></i> Loading...</span>
+    </div>
+{% endblock %}
