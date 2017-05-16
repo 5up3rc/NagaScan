@@ -48,7 +48,7 @@ configs = {
 * Run `sudo python www\wsgiapp.py` to start Web console
 
 ## Scanner
-* Modify `scanner\lib\db_operation.py` with the same DB configuration for Scanner
+* Modify `scanner\lib\db_operation.py` with your own DB configuration for Scanner
 ```
 def db_conn():
     try:
@@ -84,7 +84,7 @@ self.executable_path='[Your Own Phantomjs Binary Path]' # e.g. /home/ubuntu/phan
     * brew install python3
     * brew install mitmproxy
 * Run `mitmdump -p 443 -s "proxy/proxy_mitmproxy.py /tmp/logs.txt"` to start Proxy
-* Modify `parser\lib\db_operation.py` with the same DB configuration for Parser
+* Modify `parser\lib\db_operation.py` with your own DB configuration for Parser
 ```
 def db_conn():
     try:
