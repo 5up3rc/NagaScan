@@ -101,6 +101,6 @@ def db_conn():
 ![exclusion_1](https://github.com/brianwrf/NagaScan/blob/master/picture/exclusion_1.jpeg)
 ![exclusion_2](https://github.com/brianwrf/NagaScan/blob/master/picture/exclusion_2.jpeg)
 ![sqlmapserver](https://github.com/brianwrf/NagaScan/blob/master/picture/sqlmapserver.jpeg)
-* Install MitmProxy certificates for Brower or Mobile per [Instruction](http://docs.mitmproxy.org/en/stable/certinstall.html)
-* Add a proxy that you created for Brower or Mobile
-* Just browse websites from Brower or use APPs from Mobile whatever you like
+* Install MitmProxy certificates for Browser or Mobile per [Instruction](http://docs.mitmproxy.org/en/stable/certinstall.html)
+* Add a proxy you created in your Web Browser or Mobile Wi-Fi
+* Just browse websites from Browser or use APPs from Mobile whatever you like
