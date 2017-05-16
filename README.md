@@ -35,7 +35,7 @@ Config a proxy, e.g. Web Browser proxy or mobile Wi-Fi proxy, the traffic (inclu
 * Create database for NagaScan by using command `source schema.sql`
 
 ## Web Console
-* Modify `www\config_override.py` with your own DB configuration for Web console
+* Modify `www/config_override.py` with your own DB configuration for Web console
 ```
 configs = {
     'db': {
@@ -45,10 +45,10 @@ configs = {
     }
 }
 ```
-* Run `sudo python www\wsgiapp.py` to start Web console
+* Run `sudo python www/wsgiapp.py` to start Web console
 
 ## Scanner
-* Modify `scanner\lib\db_operation.py` with your own DB configuration for Scanner
+* Modify `scanner/lib/db_operation.py` with your own DB configuration for Scanner
 ```
 def db_conn():
     try:
@@ -63,14 +63,14 @@ def db_conn():
   * Linux 32-bit:
     * wget https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-i686.tar.bz2
     * tar -jxvf phantomjs-2.1.1-linux-i686.tar.bz2
-* Modify `scanner\lib\hack_requests.py` in line 28 as below
+* Modify `scanner/lib/hack_requests.py` in line 28 as below
 ```
 self.executable_path='[Your Own Phantomjs Binary Path]' # e.g. /home/ubuntu/phantomjs-2.1.1-linux-x86_64/bin/phantomjs
 ```
 * Run below commands to start Scanner
-  * `python scanner\scan_fi.py` to scan File Inclusion
-  * `python scanner\scan_xss.py` to scan XSS
-  * `python scanner\scan_sqli.py` to scan SQL injection
+  * `python scanner/scan_fi.py` to scan File Inclusion
+  * `python scanner/scan_xss.py` to scan XSS
+  * `python scanner/scan_sqli.py` to scan SQL injection
 
 ## Proxy & Parser
 * Install MitmProxy
@@ -84,7 +84,7 @@ self.executable_path='[Your Own Phantomjs Binary Path]' # e.g. /home/ubuntu/phan
     * brew install python3
     * brew install mitmproxy
 * Run `mitmdump -p 443 -s "proxy/proxy_mitmproxy.py /tmp/logs.txt"` to start Proxy
-* Modify `parser\lib\db_operation.py` with your own DB configuration for Parser
+* Modify `parser/lib/db_operation.py` with your own DB configuration for Parser
 ```
 def db_conn():
     try:
@@ -92,7 +92,7 @@ def db_conn():
         pwd = "toor"
         hostname = "127.0.0.1"
 ```
-* Run `python parser\parser_mitmproxy.py /tmp/logs.txt` to start Parser
+* Run `python parser/parser_mitmproxy.py /tmp/logs.txt` to start Parser
 
 # Usage
 
