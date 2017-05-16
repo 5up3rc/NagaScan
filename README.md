@@ -97,10 +97,10 @@ def db_conn():
 # Usage
 
 * Access to Web Console with the default username and password (*nagascan@example.com/Naga5c@n*) to config exclusions and add SQLMAP server
-![webconsole](http://avfisher.win/wp-content/uploads/2017/03/20170313112539_66270.png)
-![exclusion_1](http://avfisher.win/wp-content/uploads/2017/03/20170313112539_66270.png)
-![exclusion_2](http://avfisher.win/wp-content/uploads/2017/03/20170313112539_66270.png)
-![sqlmapserver](http://avfisher.win/wp-content/uploads/2017/03/20170313112539_66270.png)
+![webconsole](https://github.com/brianwrf/NagaScan/blob/master/picture/webconsole.jpeg)
+![exclusion_1](https://github.com/brianwrf/NagaScan/blob/master/picture/exclusion_1.jpeg)
+![exclusion_2](https://github.com/brianwrf/NagaScan/blob/master/picture/exclusion_2.jpeg)
+![sqlmapserver](https://github.com/brianwrf/NagaScan/blob/master/picture/sqlmapserver.jpeg)
 * Install MitmProxy certificates for Brower or Mobile per [Instruction](http://docs.mitmproxy.org/en/stable/certinstall.html)
 * Add a proxy that you created for Brower or Mobile
 * Just browse websites from Brower or use APPs from Mobile whatever you like
